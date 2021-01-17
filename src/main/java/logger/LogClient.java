@@ -1,76 +1,21 @@
 package logger;
 
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public interface LogClient {
 
 
-    void start(String processId);
+    void start(String processId, long timestamp);
 
     void end(String processId);
 
 
-    void poll();
+    String poll();
 }
 
-class LoggerImpl implements LogClient {
-
-
-    private final Map<String, Process> processes;
-    private final TreeMap<Long, Process> queue;
-
-    public LoggerImpl() {
-        this.processes = new HashMap<>();
-        this.queue= new TreeMap<>(Comparator.comparingLong(startTime -> startTime));
-
-    }
-
-    @Override
-    public void start(String processId) {
-
-        final long now = System.currentTimeMillis();
-        final Process process = new Process(processId, now);
-
-        processes.put(processId, process);
-        queue.put(now, process);
-    }
-
-    @Override
-    public void end(String processId) {
-
-        processes.get(processId).setEndTime(System.currentTimeMillis());
-       // queue.get(processId).setEndTime(System.currentTimeMillis());
-
-
-    }
-
-    @Override
-    public void poll() {
-
-        if (processes.isEmpty())
-        {
-            System.out.println("Queue is empty");
-
-        }
-        else {
-
-            final Process procees = queue.firstEntry().getValue();
-
-            if (procees.getEndTime() != -1) {
-                System.out.println(procees.getId() + " started at " + procees.getStartTime() + "& ended at " + procees.getEndTime());
-                processes.remove(procees.getId());
-                queue.pollFirstEntry();
-
-            } else {
-                System.out.println("No completed tasks in queue " + queue.size());
-            }
-
-        }
-    }
-
-
-
-}
 
 class Process {
     private final String id;
@@ -80,7 +25,7 @@ class Process {
     public Process(final String id, final long startTime) {
         this.id = id;
         this.startTime = startTime;
-        this.endTime=-1;
+        this.endTime = -1;
 
     }
 
@@ -101,30 +46,30 @@ class Process {
     }
 }
 
- class LoggerMain{
+class LoggerMain {
 
 
     public static void main(String[] args) {
 
-        final LogClient logger = new LoggerImpl();
+        final LogClient logger = new LoggerImpl(10);
 
-        logger.start("1");
-        logger.poll();
-        logger.start("3");
-        logger.poll();
-        logger.end("1");
-        logger.poll();
-        logger.start("2");
-        logger.poll();
-        logger.end("2");
-        logger.poll();
-        logger.end("3");
-        logger.poll();
-        logger.poll();
-        logger.poll();
+//        logger.start("1");
+//        logger.poll();
+//        logger.start("3");
+//        logger.poll();
+//        logger.end("1");
+//        logger.poll();
+//        logger.start("2");
+//        logger.poll();
+//        logger.end("2");
+//        logger.poll();
+//        logger.end("3");
+//        logger.poll();
+//        logger.poll();
+//        logger.poll();
 
 
-     }
+    }
 
 
 }
